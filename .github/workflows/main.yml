@@ -1,0 +1,45 @@
+name: Build BAB FM APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.5"
+          channel: stable
+
+      - name: Create Flutter project
+        run: |
+          flutter create --org com.bab bab_fm_build
+
+      - name: Copy BAB FM code
+        run: |
+          cp lib/main.dart bab_fm_build/lib/main.dart
+
+      - name: Install dependencies
+        run: |
+          cd bab_fm_build
+          flutter pub add shared_preferences
+
+      - name: Build APK
+        run: |
+          cd bab_fm_build
+          flutter build apk --release
+
+      - name: Save APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BAB-FM-v1-APK
+          path: bab_fm_build/build/app/outputs/flutter-apk/app-release.apk
